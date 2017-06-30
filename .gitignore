@@ -1,0 +1,13 @@
+.idea/
+.env
+.DS_Store
+
+src/
+
+nginx/configs/conf.d/
+nginx/configs/.htpasswd
+nginx/ssl/
+!nginx/ssl/.gitkeep
+
+dump/*.sql
+.env.save
