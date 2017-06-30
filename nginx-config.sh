@@ -14,9 +14,6 @@ ROOT_PATH="$(if [ $NODE_ENV = "prod" ]; then
                 fi;
 			fi;)"
 cat <<EOF > nginx/configs/conf.d/$APP_NAME.conf
-upstream php {
-	server app:9000;
-}
 upstream backend {
 	server backend:3000;
 }
@@ -73,72 +70,6 @@ server {
         root $ROOT_PATH;
         expires max;
         log_not_found off;
-    }
-}
-
-server {
-	server_name www.admin.$SERVER_NAME;
-	return 301 https://admin.$SERVER_NAME\$request_uri;
-}
-server {
-	listen 80;
-	listen 443 ssl;
-	ssl_certificate /etc/nginx/ssl/$SERVER_NAME.cert;
-	ssl_certificate_key /etc/nginx/ssl/$SERVER_NAME.key;
-
-	if (\$scheme = http) {
-	    return 301 https://\$server_name\$request_uri;
-	}
-
-	server_name admin.$SERVER_NAME;
-	root /var/www/html;
-
-	set \$my_var 0;
-    if (\$request_uri ~ '^/wp-json/wp/v2/.*') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '^/wp-content/.*') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '/wp-admin?/\$') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '/wp-login.php') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '/wp-login.php') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '/wp-admin/.*.php|css|js') {
-      set \$my_var 1;
-    }
-    if (\$request_uri ~ '^/robots.txt$') {
-      set \$my_var 1;
-    }
-    if (\$my_var !~ 1) {
-      return 301  https://\$server_name/wp-admin/;
-    }
-
-	location / {
-		index index.php;
-		try_files \$uri \$uri/ /index.php\$is_args\$args;
-    }
-
-    location = /favicon.ico {
-		log_not_found off;
-		access_log off;
-    }
-
-	location = /robots.txt {
-       add_header Content-Type text/plain;
-       return 200 "User-agent: *\nDisallow: /\n";
-    }
-
-	location ~ \.php\$ {
-		fastcgi_intercept_errors on;
-		fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-		include fastcgi_params;
-		fastcgi_pass php;
     }
 }
 EOF
